@@ -190,6 +190,12 @@ body.theme-retro .sdot,body.theme-futuriste .sdot,body.theme-auto .sdot{border-r
 .srow-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;transition:color .15s}
 .srow-del:hover{color:var(--danger)}
 .no-data{font-family:var(--fm);font-size:11px;color:var(--muted);text-align:center;padding:26px 0;letter-spacing:.08em}
+/* NAV ROW */
+.nav-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
+.nav-btn{font-family:var(--fm);font-size:13px;border:1px solid var(--border);background:transparent;color:var(--muted);width:28px;height:28px;border-radius:var(--radius);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-btn:hover:not(:disabled){color:var(--accent);border-color:var(--accent)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+.nav-lbl{font-family:var(--fm);font-size:11px;letter-spacing:.08em;color:var(--text);min-width:130px;text-align:center}
 .actbtns{display:flex;gap:8px;margin-top:12px}
 .actbtn{flex:1;font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border);background:transparent;color:var(--muted);padding:8px;border-radius:var(--radius);cursor:pointer;transition:all .15s;text-align:center}
 .actbtn:hover{color:var(--text);border-color:var(--text)}
@@ -326,6 +332,11 @@ body.theme-retro .sdot,body.theme-futuriste .sdot,body.theme-auto .sdot{border-r
         <button class="tabbtn" data-bartab="year">Année</button>
       </div>
     </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="barPrev">◀</button>
+      <span class="nav-lbl" id="barLbl">Cette semaine</span>
+      <button class="nav-btn" id="barNext" disabled>▶</button>
+    </div>
     <div class="chart-wrap"><canvas id="barChart"></canvas></div>
     <div class="stats-row" style="margin-top:6px">
       <div class="stats-ttl">Par activité</div>
@@ -334,6 +345,11 @@ body.theme-retro .sdot,body.theme-futuriste .sdot,body.theme-auto .sdot{border-r
         <button class="tabbtn" data-pietab="week">Semaine</button>
         <button class="tabbtn" data-pietab="month">Mois</button>
       </div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="piePrev">◀</button>
+      <span class="nav-lbl" id="pieLbl">Aujourd'hui</span>
+      <button class="nav-btn" id="pieNext" disabled>▶</button>
     </div>
     <div class="pie-wrap"><canvas id="pieChart"></canvas></div>
     <div class="list-ttl">Sessions récentes</div>
@@ -375,6 +391,7 @@ const MAX_S=4;
 let theme='default', sound='minimal', vol=0.6;
 let notifsOn=true, actLocked=false;
 let barTab='week', pieTab='day';
+let barOffset=0, pieOffset=0;   // 0 = période courante, 1 = précédente, etc.
 let barChart=null, pieChart=null;
 let keepIv=null, audioCtx=null, pendingSnd=false;
 
@@ -421,16 +438,20 @@ function wireEvents(){
   // Stats tabs
   document.getElementById('barTabs').addEventListener('click',e=>{
     const b=e.target.closest('[data-bartab]');if(!b)return;
-    barTab=b.dataset.bartab;
+    barTab=b.dataset.bartab; barOffset=0;
     document.querySelectorAll('[data-bartab]').forEach(x=>x.classList.toggle('on',x===b));
     updateBarChart();
   });
   document.getElementById('pieTabs').addEventListener('click',e=>{
     const b=e.target.closest('[data-pietab]');if(!b)return;
-    pieTab=b.dataset.pietab;
+    pieTab=b.dataset.pietab; pieOffset=0;
     document.querySelectorAll('[data-pietab]').forEach(x=>x.classList.toggle('on',x===b));
     updatePieChart();
   });
+  document.getElementById('barPrev').addEventListener('click',()=>{barOffset++;updateBarChart();});
+  document.getElementById('barNext').addEventListener('click',()=>{if(barOffset>0){barOffset--;updateBarChart();}});
+  document.getElementById('piePrev').addEventListener('click',()=>{pieOffset++;updatePieChart();});
+  document.getElementById('pieNext').addEventListener('click',()=>{if(pieOffset>0){pieOffset--;updatePieChart();}});
   document.getElementById('btnExport').addEventListener('click',exportCSV);
   document.getElementById('btnClear').addEventListener('click',clearAll);
   document.getElementById('soundGrid').addEventListener('click',e=>{
@@ -854,15 +875,39 @@ function initCharts(){
   });
 }
 
+function barPeriodLabel(){
+  const n=new Date();
+  if(barTab==='week'){
+    if(barOffset===0)return'Cette semaine';
+    if(barOffset===1)return'Semaine dernière';
+    const d=new Date(n);d.setDate(n.getDate()-barOffset*7);
+    const ws=new Date(d);ws.setDate(d.getDate()-((d.getDay()+6)%7));
+    return ws.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+  }
+  if(barTab==='month'){
+    if(barOffset===0)return'Ce mois';
+    if(barOffset===1)return'Mois dernier';
+    const d=new Date(n.getFullYear(),n.getMonth()-barOffset,1);
+    return d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  }
+  // year
+  if(barOffset===0)return'Cette année';
+  if(barOffset===1)return'Année dernière';
+  return String(n.getFullYear()-barOffset);
+}
+
 function updateBarChart(){
   if(!barChart)return;
   const all=getSess(),now=new Date();
   const acc=cv('--accent'),mu=cv('--muted'),su=cv('--surface'),tx=cv('--text');
   let labels=[],data=[];
+
   if(barTab==='week'){
-    const mon=getWeekStart();
+    // Début de la semaine avec offset
+    const base=getWeekStart();
+    base.setDate(base.getDate()-barOffset*7);
     for(let i=0;i<7;i++){
-      const d=new Date(mon);d.setDate(mon.getDate()+i);
+      const d=new Date(base);d.setDate(base.getDate()+i);
       const future=d>now;
       const localStr=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
       labels.push(d.toLocaleDateString('fr-FR',{weekday:'short'}));
@@ -873,10 +918,25 @@ function updateBarChart(){
       }).reduce((a,s)=>a+s.duration,0)/60));
     }
   } else if(barTab==='month'){
-    for(let i=3;i>=0;i--){const we=new Date(now);we.setDate(now.getDate()-i*7);const ws=new Date(we);ws.setDate(we.getDate()-6);ws.setHours(0,0,0,0);we.setHours(23,59,59,999);labels.push(ws.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}));data.push(Math.round(all.filter(s=>{const d=new Date(s.date);return d>=ws&&d<=we;}).reduce((a,s)=>a+s.duration,0)/60));}
+    for(let i=3;i>=0;i--){
+      const we=new Date(now);we.setDate(now.getDate()-barOffset*28-i*7);
+      const ws=new Date(we);ws.setDate(we.getDate()-6);ws.setHours(0,0,0,0);we.setHours(23,59,59,999);
+      labels.push(ws.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}));
+      data.push(Math.round(all.filter(s=>{const d=new Date(s.date);return d>=ws&&d<=we;}).reduce((a,s)=>a+s.duration,0)/60));
+    }
   } else {
-    for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const de=new Date(now.getFullYear(),now.getMonth()-i+1,0);de.setHours(23,59,59,999);labels.push(d.toLocaleDateString('fr-FR',{month:'short'}));data.push(Math.round(all.filter(s=>{const sd=new Date(s.date);return sd>=d&&sd<=de;}).reduce((a,s)=>a+s.duration,0)/60));}
+    const targetYear=now.getFullYear()-barOffset;
+    for(let i=11;i>=0;i--){
+      const d=new Date(targetYear,11-i,1);const de=new Date(targetYear,12-i,0);de.setHours(23,59,59,999);
+      labels.push(d.toLocaleDateString('fr-FR',{month:'short'}));
+      data.push(Math.round(all.filter(s=>{const sd=new Date(s.date);return sd>=d&&sd<=de;}).reduce((a,s)=>a+s.duration,0)/60));
+    }
   }
+
+  // Mettre à jour label + flèche droite
+  document.getElementById('barLbl').textContent=barPeriodLabel();
+  document.getElementById('barNext').disabled=(barOffset===0);
+
   barChart.data.labels=labels;barChart.data.datasets[0].data=data;
   barChart.data.datasets[0].backgroundColor=acc+'99';barChart.data.datasets[0].borderColor=acc;barChart.data.datasets[0].borderWidth=1;
   barChart.options.scales.x.ticks.color=mu;barChart.options.scales.y.ticks.color=mu;barChart.options.scales.y.grid.color=mu+'18';
@@ -884,13 +944,61 @@ function updateBarChart(){
   barChart.update();
 }
 
+function piePeriodLabel(){
+  const n=new Date();
+  if(pieTab==='day'){
+    if(pieOffset===0)return"Aujourd'hui";
+    if(pieOffset===1)return'Hier';
+    const d=new Date(n);d.setDate(n.getDate()-pieOffset);
+    return d.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'short'});
+  }
+  if(pieTab==='week'){
+    if(pieOffset===0)return'Cette semaine';
+    if(pieOffset===1)return'Semaine dernière';
+    const d=new Date(n);d.setDate(n.getDate()-pieOffset*7);
+    const ws=new Date(d);ws.setDate(d.getDate()-((d.getDay()+6)%7));
+    return ws.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+  }
+  // month
+  if(pieOffset===0)return'Ce mois';
+  if(pieOffset===1)return'Mois dernier';
+  const d=new Date(n.getFullYear(),n.getMonth()-pieOffset,1);
+  return d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+}
+
+function filterSessOffset(tab,offset){
+  const now=new Date(),all=getSess();
+  if(tab==='day'){
+    const s=new Date(now);s.setDate(now.getDate()-offset);s.setHours(0,0,0,0);
+    const e=new Date(s);e.setHours(23,59,59,999);
+    return all.filter(x=>{const d=new Date(x.date);return d>=s&&d<=e;});
+  }
+  if(tab==='week'){
+    const base=getWeekStart();base.setDate(base.getDate()-offset*7);
+    const e=new Date(base);e.setDate(base.getDate()+6);e.setHours(23,59,59,999);
+    return all.filter(x=>{const d=new Date(x.date);return d>=base&&d<=e;});
+  }
+  // month
+  const d=new Date(now.getFullYear(),now.getMonth()-offset,1);
+  const e=new Date(now.getFullYear(),now.getMonth()-offset+1,0);e.setHours(23,59,59,999);
+  return all.filter(x=>{const sd=new Date(x.date);return sd>=d&&sd<=e;});
+}
+
 function updatePieChart(){
   if(!pieChart)return;
-  const filtered=filterSess(pieTab);
+  const filtered=filterSessOffset(pieTab,pieOffset);
   const acc=cv('--accent'),mu=cv('--muted'),su=cv('--surface'),tx=cv('--text');
   const map={};filtered.forEach(s=>{map[s.activity]=(map[s.activity]||0)+s.duration;});
   const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]);
-  if(!entries.length){pieChart.data.labels=['Aucune donnée'];pieChart.data.datasets[0].data=[1];pieChart.data.datasets[0].backgroundColor=[mu+'44'];pieChart.data.datasets[0].borderColor=[mu+'44'];pieChart.update();return;}
+
+  // Mettre à jour label + flèche droite
+  document.getElementById('pieLbl').textContent=piePeriodLabel();
+  document.getElementById('pieNext').disabled=(pieOffset===0);
+
+  if(!entries.length){
+    pieChart.data.labels=['Aucune donnée'];pieChart.data.datasets[0].data=[1];
+    pieChart.data.datasets[0].backgroundColor=[mu+'44'];pieChart.data.datasets[0].borderColor=[mu+'44'];pieChart.update();return;
+  }
   const cols=entries.map((_,i)=>PIE_COLORS[i%PIE_COLORS.length]);
   pieChart.data.labels=entries.map(e=>e[0]);pieChart.data.datasets[0].data=entries.map(e=>e[1]);
   pieChart.data.datasets[0].backgroundColor=cols.map(c=>c+'cc');pieChart.data.datasets[0].borderColor=cols;pieChart.data.datasets[0].borderWidth=2;
