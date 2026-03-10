@@ -298,6 +298,7 @@ body.theme-retro .stat-value{font-size:28px}
     <div class="sessions-list-title">Sessions récentes</div>
     <div class="sessions-list" id="sessionsList"></div>
     <button class="btn clear-btn" onclick="clearAllSessions()">🗑 Effacer tout l'historique</button>
+    <button class="btn clear-btn" style="margin-top:6px;color:var(--accent);border-color:var(--accent)" onclick="exportCSV()">⬇ Exporter en CSV</button>
   </div>
 
 </div>
@@ -518,18 +519,103 @@ updateSessionDots();
 initChart();
 renderStats();
 loadPrefs();
+restoreTimerState();
 
 function loadPrefs() {
   try {
     const p = JSON.parse(localStorage.getItem('dw_prefs') || '{}');
     if (p.sound) currentSound = p.sound;
     if (p.volume !== undefined) { volume = p.volume; document.getElementById('volSlider').value = Math.round(volume*100); document.getElementById('volLabel').textContent = Math.round(volume*100)+'%'; }
+    if (p.theme && p.theme !== 'default') {
+      document.body.classList.add('theme-' + p.theme);
+      currentTheme = p.theme;
+      // Mark active theme button
+      document.querySelectorAll('.theme-option').forEach(b => {
+        const match = b.getAttribute('onclick') && b.getAttribute('onclick').includes("'"+p.theme+"'");
+        b.classList.toggle('active', match);
+      });
+    }
     updateSoundGrid();
   } catch(e) {}
 }
 function savePrefs() {
-  localStorage.setItem('dw_prefs', JSON.stringify({sound:currentSound, volume}));
+  localStorage.setItem('dw_prefs', JSON.stringify({sound:currentSound, volume, theme:currentTheme}));
 }
+
+// ── TIMER STATE PERSISTENCE ──
+function saveTimerState() {
+  try {
+    const state = {
+      currentMode,
+      remainingAtPause: isRunning ? Math.max(0, remainingAtPause - Math.floor((Date.now() - startTimestamp) / 1000)) : remainingAtPause,
+      totalTime,
+      isRunning,
+      runningTimestamp: isRunning ? Date.now() : null,
+      sessionsCompleted,
+      durations,
+      activity: document.getElementById('activityInput').value || '',
+    };
+    localStorage.setItem('dw_timer_state', JSON.stringify(state));
+  } catch(e) {}
+}
+
+function restoreTimerState() {
+  try {
+    const raw = localStorage.getItem('dw_timer_state');
+    if (!raw) return;
+    const s = JSON.parse(raw);
+
+    // Restore durations
+    if (s.durations) {
+      durations = s.durations;
+      document.getElementById('focusInput').value = durations.focus;
+      document.getElementById('shortInput').value = durations.short;
+      document.getElementById('longInput').value = durations.long;
+    }
+
+    // Restore activity
+    if (s.activity) document.getElementById('activityInput').value = s.activity;
+
+    // Restore sessions
+    if (s.sessionsCompleted !== undefined) sessionsCompleted = s.sessionsCompleted;
+
+    // Restore mode UI
+    currentMode = s.currentMode || 'focus';
+    totalTime = s.totalTime || durations[currentMode] * 60;
+    document.querySelectorAll('.mode-btn').forEach((btn,i) => btn.classList.toggle('active',['focus','short','long'][i]===currentMode));
+    const labels = {focus:'Session de focus',short:'Pause courte',long:'Pause longue'};
+    document.getElementById('modeLabel').textContent = labels[currentMode];
+    const fill = document.getElementById('progressFill');
+    fill.className = 'progress-fill' + (currentMode!=='focus'?' break':'');
+
+    // Restore time — if was running, compute elapsed since save
+    let restored = s.remainingAtPause || durations[currentMode] * 60;
+    if (s.isRunning && s.runningTimestamp) {
+      const elapsed = Math.floor((Date.now() - s.runningTimestamp) / 1000);
+      restored = Math.max(0, restored - elapsed);
+    }
+    timeLeft = restored;
+    remainingAtPause = restored;
+
+    updateDisplay();
+    updateSessionDots();
+
+    // If was running, resume automatically
+    if (s.isRunning && restored > 0) {
+      startTimer();
+      showToast('▶ Timer repris automatiquement');
+    } else if (s.isRunning && restored <= 0) {
+      // Completed while away
+      completeSession(false);
+    } else if (restored < durations[currentMode] * 60) {
+      document.getElementById('startBtn').textContent = 'Reprendre';
+    }
+  } catch(e) {}
+}
+
+// Auto-save every second + on page unload
+setInterval(saveTimerState, 1000);
+window.addEventListener('beforeunload', saveTimerState);
 
 // ════════════════════════════════════════
 //  SOUND PANEL
@@ -590,6 +676,7 @@ function setTheme(theme, btn) {
   btn.classList.add('active');
   const themeSound = themeDefaultSound[theme];
   showToast(`🎨 ${themeNames[theme]}  ·  son suggéré : ${SOUNDS.find(s=>s.id===themeSound).name}`);
+  savePrefs();
   if (workChart) setTimeout(updateChart, 100);
 }
 
@@ -655,6 +742,7 @@ function resetTimer() {
   totalTime = durations[currentMode] * 60;
   remainingAtPause = timeLeft;
   document.getElementById('startBtn').textContent = 'Démarrer';
+  localStorage.removeItem('dw_timer_state');
   updateDisplay();
 }
 
@@ -828,6 +916,26 @@ function updateChart() {
 // ════════════════════════════════════════
 //  MISC
 // ════════════════════════════════════════
+function exportCSV() {
+  const sessions = getSessions();
+  if (!sessions.length) { showToast('Aucune session à exporter'); return; }
+  const rows = [['Date','Heure','Activité','Durée (min)','Durée (h:mm)']];
+  sessions.forEach(s => {
+    const d = new Date(s.date);
+    const date = d.toLocaleDateString('fr-FR');
+    const time = d.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+    const mins = Math.round(s.duration / 60);
+    rows.push([date, time, '"' + s.activity.replace(/"/g,'""') + '"', mins, formatDurationShort(s.duration)]);
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'deepwork-sessions.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('⬇ Export CSV téléchargé');
+}
+
 function resetSessions() { sessionsCompleted=0; updateSessionDots(); showToast('↺ Sessions réinitialisées'); }
 
 function updateDisplay() {
