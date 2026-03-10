@@ -850,7 +850,7 @@ function initCharts(){
   });
   pieChart=new Chart(document.getElementById('pieChart').getContext('2d'),{
     type:'doughnut',data:{labels:[],datasets:[{data:[],borderWidth:1}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:'DM Mono',size:10},padding:10,boxWidth:12}},tooltip:{callbacks:{label:c=>' '+c.label+' — '+fmtD(c.raw*60)}}},cutout:'55%'}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:'DM Mono',size:10},padding:10,boxWidth:12}},tooltip:{callbacks:{label:c=>' '+c.label+' — '+fmtD(c.raw)}}},cutout:'55%'}
   });
 }
 
@@ -861,7 +861,17 @@ function updateBarChart(){
   let labels=[],data=[];
   if(barTab==='week'){
     const mon=getWeekStart();
-    for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);const future=d>now;labels.push(d.toLocaleDateString('fr-FR',{weekday:'short'}));data.push(future?null:Math.round(all.filter(s=>s.date.slice(0,10)===d.toISOString().slice(0,10)).reduce((a,s)=>a+s.duration,0)/60));}
+    for(let i=0;i<7;i++){
+      const d=new Date(mon);d.setDate(mon.getDate()+i);
+      const future=d>now;
+      const localStr=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      labels.push(d.toLocaleDateString('fr-FR',{weekday:'short'}));
+      data.push(future?null:Math.round(all.filter(s=>{
+        const sd=new Date(s.date);
+        const sStr=sd.getFullYear()+'-'+String(sd.getMonth()+1).padStart(2,'0')+'-'+String(sd.getDate()).padStart(2,'0');
+        return sStr===localStr;
+      }).reduce((a,s)=>a+s.duration,0)/60));
+    }
   } else if(barTab==='month'){
     for(let i=3;i>=0;i--){const we=new Date(now);we.setDate(now.getDate()-i*7);const ws=new Date(we);ws.setDate(we.getDate()-6);ws.setHours(0,0,0,0);we.setHours(23,59,59,999);labels.push(ws.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}));data.push(Math.round(all.filter(s=>{const d=new Date(s.date);return d>=ws&&d<=we;}).reduce((a,s)=>a+s.duration,0)/60));}
   } else {
