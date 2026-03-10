@@ -866,8 +866,8 @@ function cv(v){return getComputedStyle(document.body).getPropertyValue(v).trim()
 
 function initCharts(){
   barChart=new Chart(document.getElementById('barChart').getContext('2d'),{
-    type:'bar',data:{labels:[],datasets:[{data:[],borderRadius:3}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmtD(c.raw*60)}}},scales:{x:{grid:{display:false},ticks:{font:{family:'DM Mono',size:10}}},y:{grid:{color:'rgba(128,128,128,.08)'},ticks:{font:{family:'DM Mono',size:10},callback:v=>v+'m'},beginAtZero:true}}}
+    type:'line',data:{labels:[],datasets:[{data:[],tension:0.3,fill:true,pointRadius:4,pointHoverRadius:6,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmtD(c.raw*60)}}},scales:{x:{grid:{display:false},ticks:{font:{family:'DM Mono',size:10}}},y:{grid:{color:'rgba(128,128,128,.08)'},ticks:{font:{family:'DM Mono',size:10},callback:v=>{const h=Math.floor(v/60);const m=v%60;return m===0?h+'h':h+'h'+String(m).padStart(2,'0')}},beginAtZero:true,max:1440}}}
   });
   pieChart=new Chart(document.getElementById('pieChart').getContext('2d'),{
     type:'doughnut',data:{labels:[],datasets:[{data:[],borderWidth:1}]},
@@ -938,7 +938,7 @@ function updateBarChart(){
   document.getElementById('barNext').disabled=(barOffset===0);
 
   barChart.data.labels=labels;barChart.data.datasets[0].data=data;
-  barChart.data.datasets[0].backgroundColor=acc+'99';barChart.data.datasets[0].borderColor=acc;barChart.data.datasets[0].borderWidth=1;
+  barChart.data.datasets[0].backgroundColor=acc+'22';barChart.data.datasets[0].borderColor=acc;barChart.data.datasets[0].pointBackgroundColor=acc;barChart.data.datasets[0].borderWidth=2;
   barChart.options.scales.x.ticks.color=mu;barChart.options.scales.y.ticks.color=mu;barChart.options.scales.y.grid.color=mu+'18';
   barChart.options.plugins.tooltip.backgroundColor=su;barChart.options.plugins.tooltip.titleColor=tx;barChart.options.plugins.tooltip.bodyColor=acc;
   barChart.update();
