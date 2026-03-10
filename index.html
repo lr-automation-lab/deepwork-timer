@@ -988,7 +988,8 @@ function updatePieChart(){
   if(!pieChart)return;
   const filtered=filterSessOffset(pieTab,pieOffset);
   const acc=cv('--accent'),mu=cv('--muted'),su=cv('--surface'),tx=cv('--text');
-  const map={};filtered.forEach(s=>{map[s.activity]=(map[s.activity]||0)+s.duration;});
+  const map={},displayName={};
+  filtered.forEach(s=>{const k=s.activity.trim().toLowerCase();if(!displayName[k])displayName[k]=s.activity.trim();map[k]=(map[k]||0)+s.duration;});
   const entries=Object.entries(map).sort((a,b)=>b[1]-a[1]);
 
   // Mettre à jour label + flèche droite
@@ -1000,7 +1001,7 @@ function updatePieChart(){
     pieChart.data.datasets[0].backgroundColor=[mu+'44'];pieChart.data.datasets[0].borderColor=[mu+'44'];pieChart.update();return;
   }
   const cols=entries.map((_,i)=>PIE_COLORS[i%PIE_COLORS.length]);
-  pieChart.data.labels=entries.map(e=>e[0]);pieChart.data.datasets[0].data=entries.map(e=>e[1]);
+  pieChart.data.labels=entries.map(e=>displayName[e[0]]);pieChart.data.datasets[0].data=entries.map(e=>e[1]);
   pieChart.data.datasets[0].backgroundColor=cols.map(c=>c+'cc');pieChart.data.datasets[0].borderColor=cols;pieChart.data.datasets[0].borderWidth=2;
   pieChart.options.plugins.legend.labels.color=cv('--text');
   pieChart.options.plugins.tooltip.backgroundColor=su;pieChart.options.plugins.tooltip.titleColor=tx;pieChart.options.plugins.tooltip.bodyColor=acc;
