@@ -5,61 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Deepwork Timer</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&family=VT323&family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&family=Noto+Serif:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{
   --bg:#0e0e0e;--surface:#161616;--border:#2a2a2a;--text:#f0ede8;--muted:#666;
   --accent:#e8d5a3;--accent2:#a3c4e8;--danger:#e8a3a3;--radius:4px;
   --ft:'Syne',sans-serif;--fm:'DM Mono',monospace;
-  --tsz:clamp(72px,18vw,108px);--tw:800;--tls:-4px;--glow:none;
+  --tsz:clamp(64px,16vw,96px);--tw:800;--tls:-4px;--glow:none;
 }
-body.theme-lofi{
-  --bg:#1c1710;--surface:#241e16;--border:#3d3528;--text:#e8dcc8;--muted:#8a7560;
-  --accent:#d4956a;--accent2:#8ab090;--danger:#d47060;--radius:8px;
-  --ft:'Noto Serif',serif;--tw:300;--tls:2px;--glow:none;
-}
-body.theme-neon{
-  --bg:#04020f;--surface:#080520;--border:#1a0a4a;--text:#ddd0ff;--muted:#5030a0;
-  --accent:#b060ff;--accent2:#00d4ff;--danger:#ff2060;--radius:2px;
-  --ft:'Orbitron',monospace;--fm:'Space Mono',monospace;
-  --tsz:clamp(56px,13vw,84px);--tw:900;--tls:4px;
-  --glow:0 0 18px rgba(176,96,255,.7),0 0 45px rgba(176,96,255,.3);
-}
-body.theme-retro{
-  --bg:#180c00;--surface:#261400;--border:#ff6600;--text:#ff9933;--muted:#883300;
-  --accent:#ff6600;--accent2:#ffaa00;--danger:#ff2200;--radius:0px;
-  --ft:'VT323',monospace;--fm:'VT323',monospace;
-  --tsz:clamp(80px,22vw,128px);--tw:400;--tls:6px;
-  --glow:0 0 8px rgba(255,102,0,.9),0 0 22px rgba(255,102,0,.4);
-}
-body.theme-futuriste{
-  --bg:#010810;--surface:#030e1c;--border:#083060;--text:#b0e0ff;--muted:#1a5080;
-  --accent:#00aaff;--accent2:#00ffcc;--danger:#ff4040;--radius:0px;
-  --ft:'Orbitron',monospace;--fm:'Space Mono',monospace;
-  --tsz:clamp(54px,13vw,82px);--tw:700;--tls:8px;
-  --glow:0 0 14px rgba(0,170,255,.8),0 0 38px rgba(0,170,255,.3);
-}
-body.theme-ia{
-  --bg:#000900;--surface:#001300;--border:rgba(0,255,65,.15);--text:#00ff41;--muted:#005c1c;
-  --accent:#00ff41;--accent2:#39ff14;--danger:#ff0040;--radius:2px;
-  --ft:'Space Mono',monospace;--fm:'Space Mono',monospace;
-  --tsz:clamp(58px,14vw,88px);--tw:700;--tls:2px;
-  --glow:0 0 10px rgba(0,255,65,.9),0 0 28px rgba(0,255,65,.4);
-}
-body.theme-auto{
-  --bg:#0c0c0c;--surface:#131313;--border:#2c2c2c;--text:#e0e0e0;--muted:#505050;
-  --accent:#f0c040;--accent2:#60c0f0;--danger:#f04040;--radius:3px;
-  --ft:'Space Mono',monospace;--fm:'Space Mono',monospace;
-  --tsz:clamp(58px,14vw,88px);--tw:700;--tls:0px;--glow:none;
-}
-body.theme-zen{
-  --bg:#f6f2ed;--surface:#ede7e0;--border:#d5cdc4;--text:#3a342e;--muted:#9a9088;
-  --accent:#8a6a50;--accent2:#6a8870;--danger:#a06050;--radius:20px;
-  --ft:'Noto Serif',serif;--fm:'DM Mono',monospace;
-  --tw:300;--tls:0px;--glow:none;
-}
+body.theme-lofi{--bg:#1c1710;--surface:#241e16;--border:#3d3528;--text:#e8dcc8;--muted:#8a7560;--accent:#d4956a;--accent2:#8ab090;--danger:#d47060;--radius:8px;--ft:'Noto Serif',serif;--tw:300;--tls:2px;--glow:none}
+body.theme-neon{--bg:#04020f;--surface:#080520;--border:#1a0a4a;--text:#ddd0ff;--muted:#5030a0;--accent:#b060ff;--accent2:#00d4ff;--danger:#ff2060;--radius:2px;--ft:'Orbitron',monospace;--fm:'Space Mono',monospace;--tsz:clamp(50px,12vw,76px);--tw:900;--tls:4px;--glow:0 0 18px rgba(176,96,255,.7),0 0 45px rgba(176,96,255,.3)}
+body.theme-retro{--bg:#180c00;--surface:#261400;--border:#ff6600;--text:#ff9933;--muted:#883300;--accent:#ff6600;--accent2:#ffaa00;--danger:#ff2200;--radius:0px;--ft:'VT323',monospace;--fm:'VT323',monospace;--tsz:clamp(72px,20vw,116px);--tw:400;--tls:6px;--glow:0 0 8px rgba(255,102,0,.9),0 0 22px rgba(255,102,0,.4)}
+body.theme-futuriste{--bg:#010810;--surface:#030e1c;--border:#083060;--text:#b0e0ff;--muted:#1a5080;--accent:#00aaff;--accent2:#00ffcc;--danger:#ff4040;--radius:0px;--ft:'Orbitron',monospace;--fm:'Space Mono',monospace;--tsz:clamp(50px,12vw,76px);--tw:700;--tls:8px;--glow:0 0 14px rgba(0,170,255,.8),0 0 38px rgba(0,170,255,.3)}
+body.theme-ia{--bg:#000900;--surface:#001300;--border:rgba(0,255,65,.15);--text:#00ff41;--muted:#005c1c;--accent:#00ff41;--accent2:#39ff14;--danger:#ff0040;--radius:2px;--ft:'Space Mono',monospace;--fm:'Space Mono',monospace;--tsz:clamp(52px,13vw,80px);--tw:700;--tls:2px;--glow:0 0 10px rgba(0,255,65,.9),0 0 28px rgba(0,255,65,.4)}
+body.theme-auto{--bg:#0c0c0c;--surface:#131313;--border:#2c2c2c;--text:#e0e0e0;--muted:#505050;--accent:#f0c040;--accent2:#60c0f0;--danger:#f04040;--radius:3px;--ft:'Space Mono',monospace;--fm:'Space Mono',monospace;--tsz:clamp(52px,13vw,80px);--tw:700;--tls:0px;--glow:none}
+body.theme-zen{--bg:#f6f2ed;--surface:#ede7e0;--border:#d5cdc4;--text:#3a342e;--muted:#9a9088;--accent:#8a6a50;--accent2:#6a8870;--danger:#a06050;--radius:20px;--ft:'Noto Serif',serif;--fm:'DM Mono',monospace;--tw:300;--tls:0px;--glow:none}
 
-body{background:var(--bg);color:var(--text);font-family:var(--ft);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-x:hidden;transition:background .5s,color .5s}
+body{background:var(--bg);color:var(--text);font-family:var(--ft);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 24px 60px;overflow-x:hidden;transition:background .5s,color .5s}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35}
 body.theme-auto::before{background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:48px 48px}
 body.theme-retro::before{background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,102,0,.04) 2px,rgba(255,102,0,.04) 4px)}
@@ -70,52 +33,85 @@ body.theme-neon::before{background:radial-gradient(ellipse at 50% 50%,rgba(176,9
 body.theme-futuriste::before{background:radial-gradient(ellipse at 50% 0%,rgba(0,170,255,.07) 0%,transparent 70%);opacity:1}
 body.theme-retro::after,body.theme-ia::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 4px);pointer-events:none;z-index:999}
 
-.container{position:relative;width:100%;max-width:480px;z-index:1}
+.container{position:relative;width:100%;max-width:520px;z-index:1}
 body.theme-zen .container{max-width:440px}
 
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
 .header-left{display:flex;align-items:center;gap:12px}
-.header h1{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-family:var(--fm);transition:color .4s}
+.header h1{font-size:12px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-family:var(--fm)}
 body.theme-retro .header h1{font-size:18px;letter-spacing:.2em}
 body.theme-neon .header h1,body.theme-futuriste .header h1{letter-spacing:.3em}
 body.theme-zen .header h1{text-transform:none;letter-spacing:.05em;font-size:13px;font-style:italic;font-family:var(--ft);font-weight:300}
 body.theme-ia .header h1::after{content:'_';animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
-
 .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite;display:none;box-shadow:var(--glow)}
 .dot.active{display:block}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
 
-.theme-btn{font-family:var(--fm);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--border);background:transparent;color:var(--muted);padding:7px 12px;border-radius:var(--radius);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
-.theme-btn:hover{color:var(--text);border-color:var(--accent)}
+.header-actions{display:flex;gap:6px;align-items:center}
+.icon-btn{font-family:var(--fm);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--border);background:transparent;color:var(--muted);padding:7px 10px;border-radius:var(--radius);cursor:pointer;transition:all .15s;white-space:nowrap}
+.icon-btn:hover{color:var(--text);border-color:var(--accent)}
+.icon-btn.active{color:var(--accent);border-color:var(--accent)}
 
-.theme-panel{display:none;margin-bottom:24px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.theme-panel.open{display:block}
+/* PANELS */
+.collapsible{display:none;margin-bottom:20px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.collapsible.open{display:block}
+
+/* THEME GRID */
 .theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
-.theme-option{background:var(--surface);border:none;cursor:pointer;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:7px;transition:background .15s}
+.theme-option{background:var(--surface);border:none;cursor:pointer;padding:12px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;transition:background .15s}
 .theme-option:hover,.theme-option.active{background:var(--bg)}
-.theme-swatch{width:26px;height:26px;border-radius:50%;border:2px solid transparent;transition:transform .15s,border-color .15s}
+.theme-swatch{width:24px;height:24px;border-radius:50%;border:2px solid transparent;transition:transform .15s,border-color .15s}
 .theme-option.active .theme-swatch{border-color:var(--accent)}
 .theme-option:hover .theme-swatch{transform:scale(1.2)}
-.theme-name{font-family:var(--fm);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);transition:color .15s}
-.theme-option.active .theme-name{color:var(--text)}
+.opt-name{font-family:var(--fm);font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.theme-option.active .opt-name{color:var(--text)}
 
-.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:48px;overflow:hidden;transition:all .4s}
+/* SOUND PANEL */
+.sound-panel-inner{padding:16px}
+.sound-panel-title{font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.sound-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.sound-option{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;transition:all .15s;font-family:var(--fm)}
+.sound-option:hover{border-color:var(--accent);background:var(--bg)}
+.sound-option.active{border-color:var(--accent);color:var(--accent)}
+.sound-left{display:flex;align-items:center;gap:8px}
+.sound-icon{font-size:16px;line-height:1}
+.sound-info{display:flex;flex-direction:column;gap:2px}
+.sound-name{font-size:11px;letter-spacing:.05em;color:var(--text)}
+.sound-option.active .sound-name{color:var(--accent)}
+.sound-desc{font-size:9px;letter-spacing:.04em;color:var(--muted)}
+.sound-preview{font-size:10px;color:var(--muted);padding:2px 6px;border:1px solid var(--border);border-radius:var(--radius);transition:all .15s;background:transparent}
+.sound-preview:hover{color:var(--accent);border-color:var(--accent)}
+.sound-volume{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.sound-volume label{font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.vol-slider{flex:1;accent-color:var(--accent);cursor:pointer}
+
+/* ACTIVITY */
+.activity-section{margin-bottom:22px}
+.field-label{font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+body.theme-zen .field-label{text-transform:lowercase;font-style:italic}
+.activity-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--fm);font-size:13px;padding:10px 14px;border-radius:var(--radius);outline:none;transition:border-color .15s;letter-spacing:.05em}
+.activity-input:focus{border-color:var(--accent)}
+.activity-input::placeholder{color:var(--muted)}
+body.theme-retro .activity-input{font-size:16px}
+
+/* MODES */
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:36px;overflow:hidden}
 body.theme-neon .modes{box-shadow:0 0 25px rgba(176,96,255,.12)}
 body.theme-futuriste .modes{box-shadow:0 0 25px rgba(0,170,255,.1)}
-.mode-btn{background:var(--surface);border:none;color:var(--muted);font-family:var(--fm);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:12px 8px;cursor:pointer;transition:all .15s;text-align:center}
-body.theme-retro .mode-btn{font-size:15px}
+.mode-btn{background:var(--surface);border:none;color:var(--muted);font-family:var(--fm);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:11px 8px;cursor:pointer;transition:all .15s;text-align:center}
+body.theme-retro .mode-btn{font-size:14px}
 .mode-btn:hover{color:var(--text);background:var(--bg)}
 .mode-btn.active{background:var(--bg);color:var(--accent);text-shadow:var(--glow)}
 
-.timer-display{text-align:center;margin-bottom:48px;position:relative}
-.timer-label{font-family:var(--fm);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;transition:color .4s}
-body.theme-retro .timer-label{font-size:16px}
-body.theme-zen .timer-label{text-transform:lowercase;letter-spacing:.08em;font-style:italic}
+/* TIMER */
+.timer-display{text-align:center;margin-bottom:36px}
+.timer-label{font-family:var(--fm);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+body.theme-retro .timer-label{font-size:15px}
+body.theme-zen .timer-label{text-transform:lowercase;font-style:italic}
 .timer-time{font-size:var(--tsz);font-weight:var(--tw);letter-spacing:var(--tls);line-height:1;font-variant-numeric:tabular-nums;font-family:var(--ft);color:var(--text);transition:color .3s;text-shadow:var(--glow)}
 .timer-time.warning{color:var(--danger)!important;text-shadow:none!important}
-
-.progress-track{height:2px;background:var(--border);margin:24px 0;border-radius:2px;overflow:hidden}
+.progress-track{height:2px;background:var(--border);margin:20px 0;border-radius:2px;overflow:hidden}
 body.theme-futuriste .progress-track,body.theme-neon .progress-track{height:1px}
 body.theme-zen .progress-track{height:3px;border-radius:4px}
 body.theme-retro .progress-track{height:4px}
@@ -123,321 +119,750 @@ body.theme-retro .progress-track{height:4px}
 .progress-fill.break{background:var(--accent2)}
 .progress-fill.warning{background:var(--danger);box-shadow:none}
 
-.controls{display:flex;gap:12px;justify-content:center;margin-bottom:48px}
-.btn{font-family:var(--fm);font-size:11px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:transparent;color:var(--text);padding:12px 28px;border-radius:var(--radius);cursor:pointer;transition:all .15s}
-body.theme-retro .btn{font-size:16px;padding:8px 24px}
+/* CONTROLS */
+.controls{display:flex;gap:10px;justify-content:center;margin-bottom:36px}
+.btn{font-family:var(--fm);font-size:11px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:transparent;color:var(--text);padding:11px 24px;border-radius:var(--radius);cursor:pointer;transition:all .15s}
+body.theme-retro .btn{font-size:15px;padding:8px 20px}
 .btn:hover{border-color:var(--accent);background:var(--surface);color:var(--accent)}
 .btn-primary{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:700;box-shadow:var(--glow)}
 .btn-primary:hover{opacity:.82;color:var(--bg)}
 
-.settings-toggle{width:100%;background:none;border:none;border-top:1px solid var(--border);color:var(--muted);font-family:var(--fm);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:16px 0;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:color .15s}
+/* SETTINGS */
+.settings-toggle{width:100%;background:none;border:none;border-top:1px solid var(--border);color:var(--muted);font-family:var(--fm);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:14px 0;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:color .15s}
 .settings-toggle:hover{color:var(--text)}
 .settings-toggle .arrow{transition:transform .2s;font-size:10px}
 .settings-toggle.open .arrow{transform:rotate(180deg)}
-.settings-panel{display:none;padding:24px 0;border-bottom:1px solid var(--border)}
+.settings-panel{display:none;padding:20px 0;border-bottom:1px solid var(--border)}
 .settings-panel.open{display:block}
-.settings-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-.setting-group label{display:block;font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.setting-group input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--fm);font-size:20px;font-weight:500;padding:10px 12px;border-radius:var(--radius);text-align:center;outline:none;transition:border-color .15s}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.setting-group label{display:block;font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.setting-group input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--fm);font-size:18px;font-weight:500;padding:9px 10px;border-radius:var(--radius);text-align:center;outline:none;transition:border-color .15s}
 .setting-group input:focus{border-color:var(--accent)}
 .setting-group .unit{font-family:var(--fm);font-size:10px;color:var(--muted);text-align:center;margin-top:4px}
-.apply-btn{margin-top:20px;width:100%}
+.apply-btn{margin-top:18px;width:100%}
 
-.session-info{display:flex;justify-content:space-between;align-items:center;padding-top:20px;border-top:1px solid var(--border);margin-top:8px}
+/* SESSIONS */
+.session-info{display:flex;justify-content:space-between;align-items:center;padding-top:18px;border-top:1px solid var(--border);margin-top:6px}
 .session-info span{font-family:var(--fm);font-size:11px;color:var(--muted);letter-spacing:.08em}
 .sessions-dots{display:flex;gap:6px}
 .session-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--border);background:transparent;transition:background .3s}
 .session-dot.done{background:var(--accent);border-color:var(--accent);box-shadow:var(--glow)}
 body.theme-retro .session-dot,body.theme-futuriste .session-dot,body.theme-auto .session-dot{border-radius:0}
 
+/* STATS */
+.stats-panel{display:none;margin-top:32px;border-top:1px solid var(--border);padding-top:28px}
+.stats-panel.open{display:block}
+.stats-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.stats-title{font-family:var(--fm);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.stats-tabs{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.stats-tab{font-family:var(--fm);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:none;background:var(--surface);color:var(--muted);padding:7px 12px;cursor:pointer;transition:all .15s}
+.stats-tab:hover{color:var(--text);background:var(--bg)}
+.stats-tab.active{background:var(--bg);color:var(--accent)}
+.chart-container{position:relative;height:180px;margin-bottom:20px}
+.stats-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px}
+.stat-card{background:var(--surface);padding:14px 10px;text-align:center}
+.stat-value{font-family:var(--ft);font-size:22px;font-weight:var(--tw);color:var(--accent);letter-spacing:var(--tls);text-shadow:var(--glow);line-height:1}
+body.theme-retro .stat-value{font-size:28px}
+.stat-label{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.sessions-list-title{font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.sessions-list{max-height:200px;overflow-y:auto}
+.sessions-list::-webkit-scrollbar{width:3px}
+.sessions-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.session-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--border);font-family:var(--fm);font-size:11px}
+.session-row:hover{background:var(--surface)}
+.session-row:last-child{border-bottom:none}
+.session-activity{color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:10px}
+.session-meta{display:flex;gap:10px;align-items:center;flex-shrink:0}
+.session-duration{color:var(--accent);font-weight:500}
+.session-date{color:var(--muted);font-size:10px}
+.session-delete{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;transition:color .15s}
+.session-delete:hover{color:var(--danger)}
+.no-sessions{font-family:var(--fm);font-size:11px;color:var(--muted);text-align:center;padding:30px 0;letter-spacing:.08em}
+.clear-btn{margin-top:14px;width:100%;font-size:10px;padding:8px;color:var(--muted);border-color:var(--border)}
+.clear-btn:hover{color:var(--danger);border-color:var(--danger)}
+
+/* TOAST */
 .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--fm);font-size:12px;letter-spacing:.08em;padding:12px 24px;border-radius:var(--radius);transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:1000;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 <div class="container">
+
+  <!-- HEADER -->
   <div class="header">
     <div class="header-left">
       <h1>Deepwork Timer</h1>
       <div class="dot" id="runningDot"></div>
     </div>
-    <button class="theme-btn" onclick="toggleThemePanel()">🎨 <span id="themeLabel">Thème</span></button>
-  </div>
-
-  <div class="theme-panel" id="themePanel">
-    <div class="theme-grid">
-      <button class="theme-option active" onclick="setTheme('default',this)">
-        <div class="theme-swatch" style="background:linear-gradient(135deg,#0e0e0e,#e8d5a3)"></div>
-        <div class="theme-name">Minimal</div>
-      </button>
-      <button class="theme-option" onclick="setTheme('lofi',this)">
-        <div class="theme-swatch" style="background:linear-gradient(135deg,#1c1710,#d4956a)"></div>
-        <div class="theme-name">Lo-Fi</div>
-      </button>
-      <button class="theme-option" onclick="setTheme('neon',this)">
-        <div class="theme-swatch" style="background:linear-gradient(135deg,#04020f,#b060ff)"></div>
-        <div class="theme-name">Néon</div>
-      </button>
-      <button class="theme-option" onclick="setTheme('retro',this)">
-        <div class="theme-swatch" style="background:linear-gradient(135deg,#180c00,#ff6600)"></div>
-        <div class="theme-name">Rétro</div>
-      </button>
-      <button class="theme-option" onclick="setTheme('futuriste',this)">
-        <div class="theme-swatch" style="background:linear-gradient(135deg,#010810,#00aaff)"></div>
-        <div class="theme-name">Futur</div>
-      </button>
-      <button class="theme-option" onclick="setTheme('ia',this)">
-        <div class="theme-swatch" style="background:linear-gradient(135deg,#000900,#00ff41)"></div>
-        <div class="theme-name">IA</div>
-      </button>
-      <button class="theme-option" onclick="setTheme('auto',this)">
-        <div class="theme-swatch" style="background:linear-gradient(135deg,#0c0c0c,#f0c040)"></div>
-        <div class="theme-name">Auto</div>
-      </button>
-      <button class="theme-option" onclick="setTheme('zen',this)">
-        <div class="theme-swatch" style="background:linear-gradient(135deg,#f6f2ed,#8a6a50)"></div>
-        <div class="theme-name">Zen</div>
-      </button>
+    <div class="header-actions">
+      <button class="icon-btn" id="statsToggleBtn" onclick="togglePanel('statsPanel','statsToggleBtn')">📊</button>
+      <button class="icon-btn" id="soundToggleBtn" onclick="togglePanel('soundPanel','soundToggleBtn')">🔊</button>
+      <button class="icon-btn" id="themeToggleBtn" onclick="togglePanel('themePanel','themeToggleBtn')">🎨</button>
     </div>
   </div>
 
+  <!-- THEME PANEL -->
+  <div class="collapsible" id="themePanel">
+    <div class="theme-grid">
+      <button class="theme-option active" onclick="setTheme('default',this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#0e0e0e,#e8d5a3)"></div><div class="opt-name">Minimal</div></button>
+      <button class="theme-option" onclick="setTheme('lofi',this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#1c1710,#d4956a)"></div><div class="opt-name">Lo-Fi</div></button>
+      <button class="theme-option" onclick="setTheme('neon',this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#04020f,#b060ff)"></div><div class="opt-name">Néon</div></button>
+      <button class="theme-option" onclick="setTheme('retro',this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#180c00,#ff6600)"></div><div class="opt-name">Rétro</div></button>
+      <button class="theme-option" onclick="setTheme('futuriste',this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#010810,#00aaff)"></div><div class="opt-name">Futur</div></button>
+      <button class="theme-option" onclick="setTheme('ia',this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#000900,#00ff41)"></div><div class="opt-name">IA</div></button>
+      <button class="theme-option" onclick="setTheme('auto',this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#0c0c0c,#f0c040)"></div><div class="opt-name">Auto</div></button>
+      <button class="theme-option" onclick="setTheme('zen',this)"><div class="theme-swatch" style="background:linear-gradient(135deg,#f6f2ed,#8a6a50)"></div><div class="opt-name">Zen</div></button>
+    </div>
+  </div>
+
+  <!-- SOUND PANEL -->
+  <div class="collapsible" id="soundPanel">
+    <div class="sound-panel-inner">
+      <div class="sound-panel-title">Son de fin de session</div>
+      <div class="sound-grid" id="soundGrid">
+        <!-- Injected by JS -->
+      </div>
+      <div class="sound-volume">
+        <label>Volume</label>
+        <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="60" oninput="updateVolume(this.value)">
+        <span id="volLabel" style="font-family:var(--fm);font-size:10px;color:var(--muted);min-width:32px;text-align:right">60%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="activity-section">
+    <div class="field-label">Activité en cours</div>
+    <input class="activity-input" id="activityInput" type="text" placeholder="Ex: Code, Lecture, Rédaction..." maxlength="60" autocomplete="off">
+  </div>
+
+  <!-- MODES -->
   <div class="modes">
     <button class="mode-btn active" onclick="switchMode('focus')">Focus</button>
     <button class="mode-btn" onclick="switchMode('short')">Pause courte</button>
     <button class="mode-btn" onclick="switchMode('long')">Pause longue</button>
   </div>
 
+  <!-- TIMER -->
   <div class="timer-display">
     <div class="timer-label" id="modeLabel">Session de focus</div>
     <div class="timer-time" id="timerDisplay">90:00</div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progressFill" style="width:100%"></div>
-    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:100%"></div></div>
   </div>
 
+  <!-- CONTROLS -->
   <div class="controls">
     <button class="btn" onclick="resetTimer()">Reset</button>
     <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">Démarrer</button>
     <button class="btn" onclick="skipSession()">Skip</button>
   </div>
 
+  <!-- SETTINGS -->
   <button class="settings-toggle" id="settingsToggle" onclick="toggleSettings()">
-    <span>Personnaliser les durées</span>
-    <span class="arrow">▼</span>
+    <span>Personnaliser les durées</span><span class="arrow">▼</span>
   </button>
-
   <div class="settings-panel" id="settingsPanel">
     <div class="settings-grid">
-      <div class="setting-group">
-        <label>Focus</label>
-        <input type="number" id="focusInput" value="90" min="1" max="360">
-        <div class="unit">minutes</div>
-      </div>
-      <div class="setting-group">
-        <label>Pause courte</label>
-        <input type="number" id="shortInput" value="10" min="1" max="60">
-        <div class="unit">minutes</div>
-      </div>
-      <div class="setting-group">
-        <label>Pause longue</label>
-        <input type="number" id="longInput" value="30" min="1" max="120">
-        <div class="unit">minutes</div>
-      </div>
+      <div class="setting-group"><label>Focus</label><input type="number" id="focusInput" value="90" min="1" max="360"><div class="unit">minutes</div></div>
+      <div class="setting-group"><label>Pause courte</label><input type="number" id="shortInput" value="10" min="1" max="60"><div class="unit">minutes</div></div>
+      <div class="setting-group"><label>Pause longue</label><input type="number" id="longInput" value="30" min="1" max="120"><div class="unit">minutes</div></div>
     </div>
     <button class="btn btn-primary apply-btn" onclick="applySettings()">Appliquer</button>
   </div>
 
+  <!-- SESSION COUNTER -->
   <div class="session-info">
     <span>Sessions</span>
     <div class="sessions-dots" id="sessionDots"></div>
     <span id="sessionCount">0 / 4</span>
     <button class="btn" style="padding:4px 12px;font-size:10px" onclick="resetSessions()">↺</button>
   </div>
-</div>
 
+  <!-- STATS PANEL -->
+  <div class="stats-panel" id="statsPanel">
+    <div class="stats-header">
+      <div class="stats-title">Suivi du travail</div>
+      <div class="stats-tabs">
+        <button class="stats-tab active" onclick="switchStatsTab('week',this)">Semaine</button>
+        <button class="stats-tab" onclick="switchStatsTab('month',this)">Mois</button>
+        <button class="stats-tab" onclick="switchStatsTab('all',this)">Total</button>
+      </div>
+    </div>
+    <div class="stats-summary">
+      <div class="stat-card"><div class="stat-value" id="statToday">0h00</div><div class="stat-label">Aujourd'hui</div></div>
+      <div class="stat-card"><div class="stat-value" id="statWeek">0h00</div><div class="stat-label">Cette semaine</div></div>
+      <div class="stat-card"><div class="stat-value" id="statMonth">0h00</div><div class="stat-label">Ce mois</div></div>
+    </div>
+    <div class="chart-container"><canvas id="workChart"></canvas></div>
+    <div class="sessions-list-title">Sessions récentes</div>
+    <div class="sessions-list" id="sessionsList"></div>
+    <button class="btn clear-btn" onclick="clearAllSessions()">🗑 Effacer tout l'historique</button>
+  </div>
+
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
-let durations={focus:90,short:10,long:30};
-let currentMode='focus';
-let timeLeft=durations.focus*60;
-let totalTime=durations.focus*60;
-let isRunning=false;
-let interval=null;
-let sessionsCompleted=0;
-const maxSessions=4;
-let startTimestamp=null;
-let remainingAtPause=durations.focus*60;
+// ════════════════════════════════════════
+//  SOUNDS — 8 unique synthesized sounds
+// ════════════════════════════════════════
+const SOUNDS = [
+  {
+    id: 'minimal',
+    name: 'Minimal',
+    desc: 'Deux bips doux',
+    icon: '◎',
+    theme: 'default',
+    play: (vol, ctx) => {
+      [0, 0.25].forEach(t => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = 'sine'; o.frequency.value = 880;
+        g.gain.setValueAtTime(vol * 0.4, ctx.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.5);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.5);
+      });
+    }
+  },
+  {
+    id: 'lofi',
+    name: 'Lo-Fi',
+    desc: 'Vinyl craquant chaud',
+    icon: '♪',
+    theme: 'lofi',
+    play: (vol, ctx) => {
+      // Warm mellow chord + vinyl noise
+      [[220,0],[330,0.1],[440,0.05]].forEach(([freq, delay]) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        const f = ctx.createBiquadFilter();
+        f.type = 'lowpass'; f.frequency.value = 800;
+        o.connect(f); f.connect(g); g.connect(ctx.destination);
+        o.type = 'triangle'; o.frequency.value = freq;
+        g.gain.setValueAtTime(vol * 0.2, ctx.currentTime + delay);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 1.4);
+        o.start(ctx.currentTime + delay); o.stop(ctx.currentTime + delay + 1.5);
+      });
+      // noise burst
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.15;
+      const src = ctx.createBufferSource(), ng = ctx.createGain();
+      const nf = ctx.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=300;
+      src.buffer=buf; src.connect(nf); nf.connect(ng); ng.connect(ctx.destination);
+      ng.gain.setValueAtTime(vol*0.3,ctx.currentTime);
+      ng.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.08);
+      src.start(); src.stop(ctx.currentTime+0.1);
+    }
+  },
+  {
+    id: 'neon',
+    name: 'Néon',
+    desc: 'Laser électrique',
+    icon: '⚡',
+    theme: 'neon',
+    play: (vol, ctx) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o2.connect(g2); g2.connect(ctx.destination);
+      o.type='sawtooth';
+      o.frequency.setValueAtTime(1200,ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(200,ctx.currentTime+0.4);
+      g.gain.setValueAtTime(vol*0.3,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+      o.start(); o.stop(ctx.currentTime+0.4);
+      o2.type='sine'; o2.frequency.value=440;
+      g2.gain.setValueAtTime(0,ctx.currentTime+0.35);
+      g2.gain.linearRampToValueAtTime(vol*0.4,ctx.currentTime+0.45);
+      g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.9);
+      o2.start(ctx.currentTime+0.35); o2.stop(ctx.currentTime+0.9);
+    }
+  },
+  {
+    id: 'retro',
+    name: 'Rétro',
+    desc: 'Arcade 8-bit',
+    icon: '▶',
+    theme: 'retro',
+    play: (vol, ctx) => {
+      const notes = [523,659,784,1047];
+      notes.forEach((freq,i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type='square'; o.frequency.value=freq;
+        const t = ctx.currentTime + i*0.12;
+        g.gain.setValueAtTime(vol*0.25,t);
+        g.gain.setValueAtTime(0,t+0.1);
+        o.start(t); o.stop(t+0.12);
+      });
+    }
+  },
+  {
+    id: 'futuriste',
+    name: 'Futur',
+    desc: 'Scan HUD',
+    icon: '◈',
+    theme: 'futuriste',
+    play: (vol, ctx) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o2.connect(g2); g2.connect(ctx.destination);
+      o.type='sine';
+      o.frequency.setValueAtTime(300,ctx.currentTime);
+      o.frequency.linearRampToValueAtTime(1200,ctx.currentTime+0.3);
+      g.gain.setValueAtTime(vol*0.3,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+      o.start(); o.stop(ctx.currentTime+0.3);
+      o2.type='sine'; o2.frequency.value=600;
+      g2.gain.setValueAtTime(0,ctx.currentTime+0.35);
+      g2.gain.linearRampToValueAtTime(vol*0.35,ctx.currentTime+0.4);
+      g2.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.8);
+      o2.start(ctx.currentTime+0.35); o2.stop(ctx.currentTime+0.8);
+    }
+  },
+  {
+    id: 'ia',
+    name: 'IA',
+    desc: 'Traitement terminal',
+    icon: '≫',
+    theme: 'ia',
+    play: (vol, ctx) => {
+      // Rapid digital chirps
+      [0,0.08,0.16,0.28,0.36].forEach((t,i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = i%2===0 ? 'square' : 'sawtooth';
+        o.frequency.value = 200 + i * 180;
+        g.gain.setValueAtTime(vol*0.15,ctx.currentTime+t);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.07);
+        o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+0.08);
+      });
+      // final confirm tone
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      const f = ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=800;
+      o.connect(f); f.connect(g); g.connect(ctx.destination);
+      o.type='sine'; o.frequency.value=880;
+      g.gain.setValueAtTime(vol*0.35,ctx.currentTime+0.5);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+1.0);
+      o.start(ctx.currentTime+0.5); o.stop(ctx.currentTime+1.0);
+    }
+  },
+  {
+    id: 'auto',
+    name: 'Auto',
+    desc: 'Notification système',
+    icon: '⚙',
+    theme: 'auto',
+    play: (vol, ctx) => {
+      [[880,0],[1100,0.15],[880,0.3]].forEach(([freq,t]) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type='sine'; o.frequency.value=freq;
+        g.gain.setValueAtTime(vol*0.35,ctx.currentTime+t);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.14);
+        o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+0.15);
+      });
+    }
+  },
+  {
+    id: 'zen',
+    name: 'Zen',
+    desc: 'Bol tibétain',
+    icon: '◯',
+    theme: 'zen',
+    play: (vol, ctx) => {
+      // Rich bell with harmonics
+      [[220,1],[440,0.5],[660,0.25],[880,0.12]].forEach(([freq,amp],i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type='sine'; o.frequency.value=freq;
+        g.gain.setValueAtTime(vol*amp*0.4,ctx.currentTime+0.01);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+2.5+i*0.3);
+        o.start(ctx.currentTime+0.01);
+        o.stop(ctx.currentTime+2.8+i*0.3);
+      });
+    }
+  }
+];
 
-const themeNames={default:'Minimal',lofi:'Lo-Fi',neon:'Néon',retro:'Rétro',futuriste:'Futur',ia:'IA',auto:'Auto',zen:'Zen'};
+// ════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════
+let durations = {focus:90,short:10,long:30};
+let currentMode = 'focus';
+let timeLeft = durations.focus * 60;
+let totalTime = durations.focus * 60;
+let isRunning = false;
+let interval = null;
+let sessionsCompleted = 0;
+const maxSessions = 4;
+let startTimestamp = null;
+let remainingAtPause = durations.focus * 60;
+let currentTheme = 'default';
+let currentSound = 'minimal'; // independent from theme
+let volume = 0.6;
+let workChart = null;
+let currentStatsTab = 'week';
 
+const themeNames = {default:'Minimal',lofi:'Lo-Fi',neon:'Néon',retro:'Rétro',futuriste:'Futur',ia:'IA',auto:'Auto',zen:'Zen'};
+const themeDefaultSound = {default:'minimal',lofi:'lofi',neon:'neon',retro:'retro',futuriste:'futuriste',ia:'ia',auto:'auto',zen:'zen'};
+
+// ════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════
+buildSoundGrid();
 updateDisplay();
 updateSessionDots();
+initChart();
+renderStats();
+loadPrefs();
 
-function setTheme(theme,btn){
-  document.body.className=document.body.className.split(' ').filter(c=>!c.startsWith('theme-')).join(' ').trim();
-  if(theme!=='default') document.body.classList.add('theme-'+theme);
-  document.getElementById('themeLabel').textContent=themeNames[theme];
-  document.querySelectorAll('.theme-option').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  showToast('🎨 Thème : '+themeNames[theme]);
+function loadPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem('dw_prefs') || '{}');
+    if (p.sound) currentSound = p.sound;
+    if (p.volume !== undefined) { volume = p.volume; document.getElementById('volSlider').value = Math.round(volume*100); document.getElementById('volLabel').textContent = Math.round(volume*100)+'%'; }
+    updateSoundGrid();
+  } catch(e) {}
+}
+function savePrefs() {
+  localStorage.setItem('dw_prefs', JSON.stringify({sound:currentSound, volume}));
 }
 
-function toggleThemePanel(){
-  document.getElementById('themePanel').classList.toggle('open');
+// ════════════════════════════════════════
+//  SOUND PANEL
+// ════════════════════════════════════════
+function buildSoundGrid() {
+  const grid = document.getElementById('soundGrid');
+  grid.innerHTML = SOUNDS.map(s => `
+    <div class="sound-option ${s.id===currentSound?'active':''}" id="so-${s.id}" onclick="selectSound('${s.id}')">
+      <div class="sound-left">
+        <div class="sound-icon">${s.icon}</div>
+        <div class="sound-info">
+          <div class="sound-name">${s.name}</div>
+          <div class="sound-desc">${s.desc}</div>
+        </div>
+      </div>
+      <button class="sound-preview" onclick="event.stopPropagation();previewSound('${s.id}')">▶</button>
+    </div>
+  `).join('');
 }
 
-function switchMode(mode){
-  if(isRunning) pauseTimer();
-  currentMode=mode;
-  timeLeft=durations[mode]*60;
-  totalTime=durations[mode]*60;
-  remainingAtPause=timeLeft;
-  startTimestamp=null;
-  document.querySelectorAll('.mode-btn').forEach((btn,i)=>{
-    btn.classList.toggle('active',['focus','short','long'][i]===mode);
+function updateSoundGrid() {
+  document.querySelectorAll('.sound-option').forEach(el => {
+    el.classList.toggle('active', el.id === 'so-' + currentSound);
   });
-  const labels={focus:'Session de focus',short:'Pause courte',long:'Pause longue'};
-  document.getElementById('modeLabel').textContent=labels[mode];
-  const fill=document.getElementById('progressFill');
-  fill.className='progress-fill'+(mode!=='focus'?' break':'');
-  updateDisplay();
 }
 
-function toggleTimer(){isRunning?pauseTimer():startTimer()}
-
-function startTimer(){
-  isRunning=true;
-  startTimestamp=Date.now();
-  document.getElementById('startBtn').textContent='Pause';
-  document.getElementById('runningDot').classList.add('active');
-  interval=setInterval(tick,250);
+function selectSound(id) {
+  currentSound = id;
+  updateSoundGrid();
+  const s = SOUNDS.find(x=>x.id===id);
+  showToast('🔊 Son : ' + s.name + ' — ' + s.desc);
+  savePrefs();
 }
 
-function pauseTimer(){
-  isRunning=false;
-  remainingAtPause=timeLeft;
-  startTimestamp=null;
-  document.getElementById('startBtn').textContent='Reprendre';
-  document.getElementById('runningDot').classList.remove('active');
-  clearInterval(interval);
+function previewSound(id) {
+  const s = SOUNDS.find(x=>x.id===id);
+  if (!s) return;
+  try {
+    const ctx = new(window.AudioContext||window.webkitAudioContext)();
+    s.play(volume, ctx);
+  } catch(e) {}
 }
 
-function resetTimer(){
-  pauseTimer();
-  timeLeft=durations[currentMode]*60;
-  totalTime=durations[currentMode]*60;
-  remainingAtPause=timeLeft;
-  document.getElementById('startBtn').textContent='Démarrer';
-  updateDisplay();
+function updateVolume(val) {
+  volume = val / 100;
+  document.getElementById('volLabel').textContent = val + '%';
+  savePrefs();
 }
 
-function skipSession(){
-  clearInterval(interval);
-  isRunning=false;
-  startTimestamp=null;
-  completeSession();
+// ════════════════════════════════════════
+//  THEME
+// ════════════════════════════════════════
+function setTheme(theme, btn) {
+  document.body.className = document.body.className.split(' ').filter(c=>!c.startsWith('theme-')).join(' ').trim();
+  if (theme !== 'default') document.body.classList.add('theme-' + theme);
+  currentTheme = theme;
+  document.querySelectorAll('.theme-option').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const themeSound = themeDefaultSound[theme];
+  showToast(`🎨 ${themeNames[theme]}  ·  son suggéré : ${SOUNDS.find(s=>s.id===themeSound).name}`);
+  if (workChart) setTimeout(updateChart, 100);
 }
 
-function tick(){
-  if(!startTimestamp) return;
-  const elapsed=Math.floor((Date.now()-startTimestamp)/1000);
-  timeLeft=Math.max(0,remainingAtPause-elapsed);
-  if(timeLeft<=0){
-    timeLeft=0;
-    updateDisplay();
-    clearInterval(interval);
-    isRunning=false;
-    startTimestamp=null;
-    completeSession();
-  } else {
-    updateDisplay();
+// ════════════════════════════════════════
+//  PANEL TOGGLES
+// ════════════════════════════════════════
+function togglePanel(panelId, btnId) {
+  const panel = document.getElementById(panelId);
+  const btn = document.getElementById(btnId);
+  const wasOpen = panel.classList.contains('open');
+  // close all
+  ['themePanel','soundPanel','statsPanel'].forEach(id => {
+    document.getElementById(id).classList.remove('open');
+    document.getElementById(id.replace('Panel','ToggleBtn')).classList.remove('active');
+  });
+  if (!wasOpen) {
+    panel.classList.add('open');
+    btn.classList.add('active');
+    if (panelId === 'statsPanel') { renderStats(); setTimeout(updateChart,50); }
   }
 }
 
-function completeSession(){
+// ════════════════════════════════════════
+//  TIMER
+// ════════════════════════════════════════
+function switchMode(mode) {
+  if (isRunning) pauseTimer();
+  currentMode = mode;
+  timeLeft = durations[mode] * 60;
+  totalTime = durations[mode] * 60;
+  remainingAtPause = timeLeft;
+  startTimestamp = null;
+  document.querySelectorAll('.mode-btn').forEach((btn,i) => btn.classList.toggle('active',['focus','short','long'][i]===mode));
+  const labels = {focus:'Session de focus',short:'Pause courte',long:'Pause longue'};
+  document.getElementById('modeLabel').textContent = labels[mode];
+  const fill = document.getElementById('progressFill');
+  fill.className = 'progress-fill' + (mode!=='focus'?' break':'');
+  updateDisplay();
+}
+
+function toggleTimer() { isRunning ? pauseTimer() : startTimer(); }
+
+function startTimer() {
+  isRunning = true;
+  startTimestamp = Date.now();
+  document.getElementById('startBtn').textContent = 'Pause';
+  document.getElementById('runningDot').classList.add('active');
+  interval = setInterval(tick, 250);
+}
+
+function pauseTimer() {
+  isRunning = false;
+  remainingAtPause = timeLeft;
+  startTimestamp = null;
+  document.getElementById('startBtn').textContent = 'Reprendre';
   document.getElementById('runningDot').classList.remove('active');
-  document.getElementById('startBtn').textContent='Démarrer';
-  if(currentMode==='focus'){
-    sessionsCompleted=Math.min(sessionsCompleted+1,maxSessions);
+  clearInterval(interval);
+}
+
+function resetTimer() {
+  pauseTimer();
+  timeLeft = durations[currentMode] * 60;
+  totalTime = durations[currentMode] * 60;
+  remainingAtPause = timeLeft;
+  document.getElementById('startBtn').textContent = 'Démarrer';
+  updateDisplay();
+}
+
+function skipSession() {
+  clearInterval(interval); isRunning = false; startTimestamp = null;
+  completeSession(true);
+}
+
+function tick() {
+  if (!startTimestamp) return;
+  const elapsed = Math.floor((Date.now() - startTimestamp) / 1000);
+  timeLeft = Math.max(0, remainingAtPause - elapsed);
+  if (timeLeft <= 0) {
+    timeLeft = 0; updateDisplay(); clearInterval(interval);
+    isRunning = false; startTimestamp = null; completeSession(false);
+  } else { updateDisplay(); }
+}
+
+function completeSession(skipped) {
+  document.getElementById('runningDot').classList.remove('active');
+  document.getElementById('startBtn').textContent = 'Démarrer';
+  if (currentMode === 'focus') {
+    const workedSecs = totalTime - timeLeft;
+    if (workedSecs >= 60) saveSession(workedSecs);
+    sessionsCompleted = Math.min(sessionsCompleted + 1, maxSessions);
     updateSessionDots();
-    const nextMode=sessionsCompleted>=maxSessions?'long':'short';
-    showToast(sessionsCompleted>=maxSessions?'🎯 4 sessions ! Longue pause méritée':'✓ Session terminée — pause !');
-    setTimeout(()=>switchMode(nextMode),800);
-    if(sessionsCompleted>=maxSessions) sessionsCompleted=0;
+    const nextMode = sessionsCompleted >= maxSessions ? 'long' : 'short';
+    showToast(sessionsCompleted >= maxSessions ? '🎯 4 sessions ! Longue pause méritée' : '✓ Session terminée — pause !');
+    setTimeout(() => switchMode(nextMode), 800);
+    if (sessionsCompleted >= maxSessions) sessionsCompleted = 0;
   } else {
     showToast('⚡ Pause terminée — retour au focus');
-    setTimeout(()=>switchMode('focus'),800);
+    setTimeout(() => switchMode('focus'), 800);
   }
-  playBeep();
+  playCurrentSound();
+  if (document.getElementById('statsPanel').classList.contains('open')) {
+    setTimeout(() => { renderStats(); updateChart(); }, 900);
+  }
 }
 
-function resetSessions(){
-  sessionsCompleted=0;
-  updateSessionDots();
-  showToast('↺ Sessions réinitialisées');
+function playCurrentSound() {
+  const s = SOUNDS.find(x => x.id === currentSound);
+  if (!s) return;
+  try {
+    const ctx = new(window.AudioContext||window.webkitAudioContext)();
+    s.play(volume, ctx);
+  } catch(e) {}
 }
 
-function updateDisplay(){
-  const mins=Math.floor(timeLeft/60);
-  const secs=timeLeft%60;
+// ════════════════════════════════════════
+//  SESSION STORAGE
+// ════════════════════════════════════════
+function getSessions() { try { return JSON.parse(localStorage.getItem('dw_sessions')||'[]'); } catch(e) { return []; } }
+function saveSessions(s) { localStorage.setItem('dw_sessions', JSON.stringify(s)); }
+function saveSession(durationSecs) {
+  const sessions = getSessions();
+  sessions.push({ id:Date.now(), date:new Date().toISOString(), activity:document.getElementById('activityInput').value.trim()||'Focus', duration:durationSecs });
+  saveSessions(sessions);
+}
+function deleteSession(id) { saveSessions(getSessions().filter(s=>s.id!==id)); renderStats(); updateChart(); }
+function clearAllSessions() {
+  if (confirm('Effacer tout l\'historique ?')) { localStorage.removeItem('dw_sessions'); renderStats(); updateChart(); showToast('🗑 Historique effacé'); }
+}
+
+// ════════════════════════════════════════
+//  STATS
+// ════════════════════════════════════════
+function formatDuration(secs) { const h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60); return h>0?`${h}h${String(m).padStart(2,'0')}`:`${m}min`; }
+function formatDurationShort(secs) { const h=Math.floor(secs/3600),m=Math.floor((secs%3600)/60); return h>0?`${h}h${String(m).padStart(2,'0')}`:`${m}m`; }
+
+function renderStats() {
+  const sessions = getSessions();
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0,10);
+  const todaySecs = sessions.filter(s=>s.date.slice(0,10)===todayStr).reduce((a,s)=>a+s.duration,0);
+  const dow = (now.getDay()+6)%7;
+  const weekStart = new Date(now); weekStart.setDate(now.getDate()-dow); weekStart.setHours(0,0,0,0);
+  const weekSecs = sessions.filter(s=>new Date(s.date)>=weekStart).reduce((a,s)=>a+s.duration,0);
+  const monthStart = new Date(now.getFullYear(),now.getMonth(),1);
+  const monthSecs = sessions.filter(s=>new Date(s.date)>=monthStart).reduce((a,s)=>a+s.duration,0);
+  document.getElementById('statToday').textContent = formatDuration(todaySecs);
+  document.getElementById('statWeek').textContent = formatDuration(weekSecs);
+  document.getElementById('statMonth').textContent = formatDuration(monthSecs);
+  const list = document.getElementById('sessionsList');
+  const sorted = [...sessions].reverse().slice(0,30);
+  if (!sorted.length) { list.innerHTML='<div class="no-sessions">Aucune session enregistrée</div>'; return; }
+  list.innerHTML = sorted.map(s => {
+    const d = new Date(s.date);
+    return `<div class="session-row">
+      <span class="session-activity">${escapeHtml(s.activity)}</span>
+      <span class="session-meta">
+        <span class="session-duration">${formatDurationShort(s.duration)}</span>
+        <span class="session-date">${d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span>
+        <button class="session-delete" onclick="deleteSession(${s.id})">×</button>
+      </span>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function initChart() {
+  const ctx = document.getElementById('workChart').getContext('2d');
+  workChart = new Chart(ctx, {
+    type:'bar',
+    data:{labels:[],datasets:[{data:[],borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+formatDuration(c.raw*60)}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{family:'DM Mono',size:10}}},
+        y:{grid:{color:'rgba(128,128,128,0.08)'},ticks:{font:{family:'DM Mono',size:10},callback:v=>v+'m'},beginAtZero:true}
+      }
+    }
+  });
+  updateChart();
+}
+
+function switchStatsTab(tab,btn) {
+  currentStatsTab=tab;
+  document.querySelectorAll('.stats-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updateChart();
+}
+
+function updateChart() {
+  if (!workChart) return;
+  const sessions = getSessions();
+  const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim();
+  const muted = getComputedStyle(document.body).getPropertyValue('--muted').trim();
+  const now = new Date();
+  let labels=[], data=[];
+  if (currentStatsTab==='week') {
+    for (let i=6;i>=0;i--) {
+      const d=new Date(now); d.setDate(now.getDate()-i); d.setHours(0,0,0,0);
+      labels.push(d.toLocaleDateString('fr-FR',{weekday:'short'}));
+      data.push(Math.round(sessions.filter(s=>s.date.slice(0,10)===d.toISOString().slice(0,10)).reduce((a,s)=>a+s.duration,0)/60));
+    }
+  } else if (currentStatsTab==='month') {
+    for (let i=3;i>=0;i--) {
+      const wEnd=new Date(now); wEnd.setDate(now.getDate()-i*7);
+      const wStart=new Date(wEnd); wStart.setDate(wEnd.getDate()-6); wStart.setHours(0,0,0,0); wEnd.setHours(23,59,59,999);
+      labels.push(wStart.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}));
+      data.push(Math.round(sessions.filter(s=>{const d=new Date(s.date);return d>=wStart&&d<=wEnd;}).reduce((a,s)=>a+s.duration,0)/60));
+    }
+  } else {
+    const mm={};
+    sessions.forEach(s=>{const k=s.date.slice(0,7);mm[k]=(mm[k]||0)+s.duration;});
+    Object.keys(mm).sort().forEach(k=>{
+      const [y,m]=k.split('-');
+      labels.push(new Date(+y,+m-1,1).toLocaleDateString('fr-FR',{month:'short',year:'2-digit'}));
+      data.push(Math.round(mm[k]/60));
+    });
+    if (!labels.length){labels=['—'];data=[0];}
+  }
+  workChart.data.labels=labels;
+  workChart.data.datasets[0].data=data;
+  workChart.data.datasets[0].backgroundColor=accent+'99';
+  workChart.data.datasets[0].borderColor=accent;
+  workChart.data.datasets[0].borderWidth=1;
+  workChart.options.scales.x.ticks.color=muted;
+  workChart.options.scales.y.ticks.color=muted;
+  workChart.options.scales.y.grid.color=muted+'18';
+  const surface=getComputedStyle(document.body).getPropertyValue('--surface').trim();
+  const text=getComputedStyle(document.body).getPropertyValue('--text').trim();
+  workChart.options.plugins.tooltip.backgroundColor=surface;
+  workChart.options.plugins.tooltip.titleColor=text;
+  workChart.options.plugins.tooltip.bodyColor=accent;
+  workChart.update();
+}
+
+// ════════════════════════════════════════
+//  MISC
+// ════════════════════════════════════════
+function resetSessions() { sessionsCompleted=0; updateSessionDots(); showToast('↺ Sessions réinitialisées'); }
+
+function updateDisplay() {
+  const mins=Math.floor(timeLeft/60), secs=timeLeft%60;
   document.getElementById('timerDisplay').textContent=`${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
   const pct=totalTime>0?(timeLeft/totalTime)*100:100;
   document.getElementById('progressFill').style.width=pct+'%';
-  const timerEl=document.getElementById('timerDisplay');
-  const fillEl=document.getElementById('progressFill');
   const isWarning=timeLeft<=60&&timeLeft>0;
-  timerEl.classList.toggle('warning',isWarning);
-  if(isWarning) fillEl.classList.add('warning');
-  else fillEl.classList.remove('warning');
+  document.getElementById('timerDisplay').classList.toggle('warning',isWarning);
+  const fill=document.getElementById('progressFill');
+  if(isWarning) fill.classList.add('warning'); else fill.classList.remove('warning');
 }
 
-function updateSessionDots(){
-  const container=document.getElementById('sessionDots');
-  container.innerHTML='';
-  for(let i=0;i<maxSessions;i++){
-    const dot=document.createElement('div');
-    dot.className='session-dot'+(i<sessionsCompleted?' done':'');
-    container.appendChild(dot);
-  }
+function updateSessionDots() {
+  const c=document.getElementById('sessionDots'); c.innerHTML='';
+  for(let i=0;i<maxSessions;i++){const d=document.createElement('div');d.className='session-dot'+(i<sessionsCompleted?' done':'');c.appendChild(d);}
   document.getElementById('sessionCount').textContent=`${sessionsCompleted} / ${maxSessions}`;
 }
 
-function toggleSettings(){
+function toggleSettings() {
   document.getElementById('settingsPanel').classList.toggle('open');
   document.getElementById('settingsToggle').classList.toggle('open');
 }
 
-function applySettings(){
-  const focus=parseInt(document.getElementById('focusInput').value)||90;
-  const short=parseInt(document.getElementById('shortInput').value)||10;
-  const long=parseInt(document.getElementById('longInput').value)||30;
-  durations={focus:Math.max(1,focus),short:Math.max(1,short),long:Math.max(1,long)};
-  resetTimer();
-  showToast('✓ Durées mises à jour');
+function applySettings() {
+  const f=parseInt(document.getElementById('focusInput').value)||90;
+  const s=parseInt(document.getElementById('shortInput').value)||10;
+  const l=parseInt(document.getElementById('longInput').value)||30;
+  durations={focus:Math.max(1,f),short:Math.max(1,s),long:Math.max(1,l)};
+  resetTimer(); showToast('✓ Durées mises à jour');
 }
 
-function showToast(msg){
-  const toast=document.getElementById('toast');
-  toast.textContent=msg;
-  toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'),3000);
-}
-
-function playBeep(){
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const osc=ctx.createOscillator();
-    const gain=ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value=880;
-    osc.type='sine';
-    gain.gain.setValueAtTime(.3,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.8);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime+.8);
-  }catch(e){}
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
 </script>
 </body>
