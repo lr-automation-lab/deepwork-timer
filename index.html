@@ -737,6 +737,17 @@ function pauseTimer() {
 }
 
 function resetTimer() {
+  const workedSecs = totalTime - timeLeft;
+  if (currentMode === 'focus' && workedSecs >= 60) {
+    const workedMin = Math.round(workedSecs / 60);
+    const save = confirm(`Sauvegarder les ${workedMin} min travaillées avant de réinitialiser ?`);
+    if (save) {
+      saveSession(workedSecs);
+      sessionsCompleted = Math.min(sessionsCompleted + 1, maxSessions);
+      updateSessionDots();
+      if (sessionsCompleted >= maxSessions) sessionsCompleted = 0;
+    }
+  }
   pauseTimer();
   timeLeft = durations[currentMode] * 60;
   totalTime = durations[currentMode] * 60;
