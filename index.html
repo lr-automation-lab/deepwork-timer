@@ -90,10 +90,23 @@ body.theme-ia .header h1::after{content:'_';animation:blink 1s step-end infinite
 .activity-section{margin-bottom:22px}
 .field-label{font-family:var(--fm);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
 body.theme-zen .field-label{text-transform:lowercase;font-style:italic}
-.activity-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--fm);font-size:13px;padding:10px 14px;border-radius:var(--radius);outline:none;transition:border-color .15s;letter-spacing:.05em}
+
+/* Activity input mode */
+.activity-input-wrap{display:flex;gap:8px;align-items:center}
+.activity-input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--fm);font-size:13px;padding:10px 14px;border-radius:var(--radius);outline:none;transition:border-color .15s;letter-spacing:.05em}
 .activity-input:focus{border-color:var(--accent)}
 .activity-input::placeholder{color:var(--muted)}
 body.theme-retro .activity-input{font-size:16px}
+.activity-confirm-btn{font-family:var(--fm);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--accent);background:var(--accent);color:var(--bg);padding:10px 14px;border-radius:var(--radius);cursor:pointer;transition:all .15s;white-space:nowrap;font-weight:700}
+.activity-confirm-btn:hover{opacity:.82}
+
+/* Activity locked mode */
+.activity-locked{display:none;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px}
+.activity-locked.visible{display:flex}
+.activity-locked-name{font-family:var(--fm);font-size:13px;color:var(--accent);letter-spacing:.05em;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:var(--glow)}
+body.theme-retro .activity-locked-name{font-size:16px}
+.activity-edit-btn{font-family:var(--fm);font-size:9px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border);background:transparent;color:var(--muted);padding:4px 10px;border-radius:var(--radius);cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.activity-edit-btn:hover{color:var(--text);border-color:var(--text)}
 
 /* MODES */
 .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:36px;overflow:hidden}
@@ -233,8 +246,19 @@ body.theme-retro .stat-value{font-size:28px}
 
   <!-- ACTIVITY -->
   <div class="activity-section">
-    <div class="field-label">Activité en cours</div>
-    <input class="activity-input" id="activityInput" type="text" placeholder="Ex: Code, Lecture, Rédaction..." maxlength="60" autocomplete="off">
+    <div class="field-label" id="activityLabel">Activité en cours</div>
+
+    <!-- Input mode -->
+    <div class="activity-input-wrap" id="activityInputWrap">
+      <input class="activity-input" id="activityInput" type="text" placeholder="Ex: Code, Lecture, Rédaction..." maxlength="60" autocomplete="off" onkeydown="handleActivityKey(event)">
+      <button class="activity-confirm-btn" onclick="lockActivity()">↵ OK</button>
+    </div>
+
+    <!-- Locked mode -->
+    <div class="activity-locked" id="activityLocked">
+      <span class="activity-locked-name" id="activityLockedName"></span>
+      <button class="activity-edit-btn" onclick="editActivity()">✎ Changer</button>
+    </div>
   </div>
 
   <!-- MODES -->
@@ -554,6 +578,7 @@ function saveTimerState() {
       sessionsCompleted,
       durations,
       activity: document.getElementById('activityInput').value || '',
+      activityLocked: document.getElementById('activityLocked').classList.contains('visible'),
     };
     localStorage.setItem('dw_timer_state', JSON.stringify(state));
   } catch(e) {}
@@ -573,8 +598,9 @@ function restoreTimerState() {
       document.getElementById('longInput').value = durations.long;
     }
 
-    // Restore activity
+    // Restore activity + lock state
     if (s.activity) document.getElementById('activityInput').value = s.activity;
+    if (s.activityLocked && s.activity) lockActivity();
 
     // Restore sessions
     if (s.sessionsCompleted !== undefined) sessionsCompleted = s.sessionsCompleted;
@@ -810,7 +836,7 @@ function getSessions() { try { return JSON.parse(localStorage.getItem('dw_sessio
 function saveSessions(s) { localStorage.setItem('dw_sessions', JSON.stringify(s)); }
 function saveSession(durationSecs) {
   const sessions = getSessions();
-  sessions.push({ id:Date.now(), date:new Date().toISOString(), activity:document.getElementById('activityInput').value.trim()||'Focus', duration:durationSecs });
+  sessions.push({ id:Date.now(), date:new Date().toISOString(), activity:getActivityName(), duration:durationSecs });
   saveSessions(sessions);
 }
 function deleteSession(id) { saveSessions(getSessions().filter(s=>s.id!==id)); renderStats(); updateChart(); }
@@ -947,7 +973,32 @@ function exportCSV() {
   showToast('⬇ Export CSV téléchargé');
 }
 
-function resetSessions() { sessionsCompleted=0; updateSessionDots(); showToast('↺ Sessions réinitialisées'); }
+// ── ACTIVITY LOCK ──
+function handleActivityKey(e) {
+  if (e.key === 'Enter') lockActivity();
+}
+
+function lockActivity() {
+  const val = document.getElementById('activityInput').value.trim();
+  const name = val || 'Focus';
+  document.getElementById('activityLockedName').textContent = '⬤ ' + name;
+  document.getElementById('activityInputWrap').style.display = 'none';
+  document.getElementById('activityLocked').classList.add('visible');
+  document.getElementById('activityLabel').textContent = 'Activité en cours';
+  saveTimerState();
+}
+
+function editActivity() {
+  document.getElementById('activityInputWrap').style.display = 'flex';
+  document.getElementById('activityLocked').classList.remove('visible');
+  const input = document.getElementById('activityInput');
+  input.focus();
+  input.select();
+}
+
+function getActivityName() {
+  return document.getElementById('activityInput').value.trim() || 'Focus';
+} sessionsCompleted=0; updateSessionDots(); showToast('↺ Sessions réinitialisées'); }
 
 function updateDisplay() {
   const mins=Math.floor(timeLeft/60), secs=timeLeft%60;
