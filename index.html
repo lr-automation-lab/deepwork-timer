@@ -189,6 +189,9 @@ body.theme-retro .sdot,body.theme-futuriste .sdot,body.theme-auto .sdot{border-r
 .srow-dt{color:var(--muted);font-size:10px}
 .srow-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;transition:color .15s}
 .srow-del:hover{color:var(--danger)}
+.srow-ren{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0 2px;line-height:1;transition:color .15s}
+.srow-ren:hover{color:var(--accent)}
+.srow-edit{flex:1;background:var(--surface);border:1px solid var(--accent);color:var(--text);font-family:var(--fm);font-size:11px;padding:2px 6px;border-radius:var(--radius);outline:none;margin-right:8px;min-width:0}
 .no-data{font-family:var(--fm);font-size:11px;color:var(--muted);text-align:center;padding:26px 0;letter-spacing:.08em}
 /* NAV ROW */
 .nav-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px}
@@ -827,6 +830,17 @@ function getSess(){try{return JSON.parse(localStorage.getItem('dw_sessions')||'[
 function putSess(a){localStorage.setItem('dw_sessions',JSON.stringify(a));}
 function saveSession(secs){const a=getSess();a.push({id:Date.now(),date:new Date().toISOString(),activity:getAct(),duration:secs});putSess(a);}
 function delSession(id){putSess(getSess().filter(s=>s.id!==id));renderStats();updateBarChart();updatePieChart();}
+function renameSession(id,newName){const a=getSess();const s=a.find(x=>x.id===id);if(s&&newName.trim()){s.activity=newName.trim();putSess(a);}renderStats();updateBarChart();updatePieChart();}
+function startRenameSession(id,currentName,nmEl){
+  const inp=document.createElement('input');
+  inp.className='srow-edit';inp.value=currentName;
+  nmEl.replaceWith(inp);inp.focus();inp.select();
+  let done=false;
+  function commit(){if(done)return;done=true;renameSession(id,inp.value.trim()||currentName);}
+  function cancel(){if(done)return;done=true;renderStats();}
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commit();}else if(e.key==='Escape'){e.preventDefault();cancel();}});
+  inp.addEventListener('blur',commit);
+}
 function clearAll(){if(confirm('Effacer tout l\'historique ?')){localStorage.removeItem('dw_sessions');renderStats();updateBarChart();updatePieChart();toast('🗑 Historique effacé');}}
 
 // ═══════════════════════════════════════
@@ -857,9 +871,15 @@ function renderStats(){
   if(!sorted.length){list.innerHTML='<div class="no-data">Aucune session enregistrée</div>';return;}
   list.innerHTML=sorted.map(s=>{
     const d=new Date(s.date);
-    return `<div class="srow"><span class="srow-nm">${esc(s.activity)}</span><span class="srow-meta"><span class="srow-dur">${fmtS(s.duration)}</span><span class="srow-dt">${d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span><button class="srow-del" data-del="${s.id}">×</button></span></div>`;
+    return `<div class="srow" data-id="${s.id}"><span class="srow-nm">${esc(s.activity)}</span><span class="srow-meta"><span class="srow-dur">${fmtS(s.duration)}</span><span class="srow-dt">${d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})} ${d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span><button class="srow-ren" data-ren="${s.id}" title="Renommer">✎</button><button class="srow-del" data-del="${s.id}">×</button></span></div>`;
   }).join('');
   list.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>delSession(+b.dataset.del)));
+  list.querySelectorAll('[data-ren]').forEach(b=>b.addEventListener('click',()=>{
+    const row=b.closest('.srow');
+    const nmEl=row.querySelector('.srow-nm');
+    const currentName=nmEl.textContent;
+    startRenameSession(+b.dataset.ren,currentName,nmEl);
+  }));
 }
 
 function cv(v){return getComputedStyle(document.body).getPropertyValue(v).trim();}
