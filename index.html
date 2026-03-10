@@ -223,6 +223,7 @@ body.theme-retro .stat-val{font-size:26px}
     </div>
     <div class="header-actions">
       <button class="icon-btn" id="btnStats" onclick="toggleSection('stats')">📊</button>
+      <button class="icon-btn" id="btnNotif" onclick="toggleNotifs()">🔔</button>
       <button class="icon-btn" id="btnSound" onclick="toggleSection('sound')">🔊</button>
       <button class="icon-btn" id="btnTheme" onclick="toggleSection('theme')">🎨</button>
     </div>
@@ -436,6 +437,11 @@ function loadAll() {
         b.classList.toggle('active', b.getAttribute('onclick') && b.getAttribute('onclick').includes("'"+p.theme+"'"));
       });
     }
+    if (p.notifsEnabled === false) {
+      notifsEnabled = false;
+      document.getElementById('btnNotif').textContent = '🔕';
+      document.getElementById('btnNotif').classList.add('active');
+    }
     updateSoundGrid();
 
     // Timer state
@@ -471,7 +477,7 @@ function loadAll() {
 function saveAll() {
   try {
     // Prefs
-    localStorage.setItem('dw_prefs', JSON.stringify({sound:currentSound,volume,theme:currentTheme}));
+    localStorage.setItem('dw_prefs', JSON.stringify({sound:currentSound,volume,theme:currentTheme,notifsEnabled}));
     // Timer state
     const left = running ? Math.max(0, pauseLeft - Math.floor((Date.now()-ts)/1000)) : timeLeft;
     const activity = document.getElementById('activityInput').value||'';
@@ -545,12 +551,102 @@ function selectSound(id) {
   showToast('🔊 '+SOUNDS.find(s=>s.id===id).name); saveAll();
 }
 function previewSound(id) {
-  try { const s=SOUNDS.find(x=>x.id===id); if(!s) return; const c=new(window.AudioContext||window.webkitAudioContext)(); s.play(volume,c); } catch(e){}
+  try { const s=SOUNDS.find(x=>x.id===id); if(!s) return; const ctx=getAudioCtx(); ctx.resume().then(()=>s.play(volume,ctx)); } catch(e){}
 }
 function setVolume(v) { volume=v/100; document.getElementById('volVal').textContent=v+'%'; saveAll(); }
-function playSound() {
-  try { const s=SOUNDS.find(x=>x.id===currentSound); if(!s) return; const c=new(window.AudioContext||window.webkitAudioContext)(); s.play(volume,c); } catch(e){}
+
+let audioCtx = null;
+let pendingSound = false;
+
+function getAudioCtx() {
+  if (!audioCtx || audioCtx.state === 'closed') {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
 }
+
+// ── NOTIFICATIONS ──
+let notifsEnabled = true;
+
+function toggleNotifs() {
+  notifsEnabled = !notifsEnabled;
+  const btn = document.getElementById('btnNotif');
+  if (notifsEnabled) {
+    btn.textContent = '🔔';
+    btn.classList.remove('active');
+    showToast('🔔 Notifications activées');
+    requestNotifPermission();
+  } else {
+    btn.textContent = '🔕';
+    btn.classList.add('active');
+    showToast('🔕 Notifications désactivées');
+  }
+  saveAll();
+}
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function sendNotification(title, body) {
+  if (!notifsEnabled) return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') {
+    const n = new Notification(title, {
+      body,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="%230e0e0e" stroke="%23e8d5a3" stroke-width="3"/><text x="32" y="42" text-anchor="middle" font-size="28" fill="%23e8d5a3">⏱</text></svg>',
+      requireInteraction: false,
+      silent: false // OS plays its default notification sound
+    });
+    setTimeout(() => n.close(), 8000);
+  } else if (Notification.permission === 'default') {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') sendNotification(title, body);
+    });
+  }
+}
+
+function playSound() {
+  try {
+    const s = SOUNDS.find(x => x.id === currentSound);
+    if (!s) return;
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') {
+      pendingSound = true;
+      return;
+    }
+    ctx.resume().then(() => { s.play(volume, ctx); }).catch(() => { pendingSound = true; });
+  } catch(e) { pendingSound = true; }
+}
+
+// Play pending sound when tab becomes visible again
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && pendingSound) {
+    pendingSound = false;
+    setTimeout(() => {
+      try {
+        const s = SOUNDS.find(x => x.id === currentSound);
+        if (!s) return;
+        const ctx = getAudioCtx();
+        ctx.resume().then(() => s.play(volume, ctx));
+      } catch(e) {}
+    }, 200);
+  }
+});
+
+// Resume AudioContext on first user interaction
+function resumeOnInteraction() {
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  if (pendingSound) {
+    pendingSound = false;
+    try {
+      const s = SOUNDS.find(x => x.id === currentSound);
+      if (s) { const ctx=getAudioCtx(); ctx.resume().then(()=>s.play(volume,ctx)); }
+    } catch(e) {}
+  }
+}
+document.addEventListener('click', resumeOnInteraction, true);
+document.addEventListener('keydown', resumeOnInteraction, true);
 
 // ══════════════════════════════════════
 //  ACTIVITY
@@ -593,10 +689,37 @@ function switchMode(m) {
 function toggleTimer() { running ? pauseTimer() : startTimer(); }
 
 function startTimer() {
+  requestNotifPermission();
   running=true; ts=Date.now();
   document.getElementById('startBtn').textContent='Pause';
   document.getElementById('runningDot').classList.add('active');
   iv=setInterval(tick,250);
+  startAudioKeepalive();
+}
+
+// ── AUDIO KEEPALIVE ──
+// Joue une note silencieuse toutes les 10s pour garder l'AudioContext actif
+// même quand l'onglet est en arrière-plan → le son de fin peut jouer
+let keepaliveIv = null;
+function startAudioKeepalive() {
+  stopAudioKeepalive();
+  // Init l'AudioContext maintenant pendant qu'on a le focus
+  try { const ctx = getAudioCtx(); ctx.resume(); } catch(e) {}
+  keepaliveIv = setInterval(() => {
+    if (!running) { stopAudioKeepalive(); return; }
+    try {
+      const ctx = getAudioCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+      // Note totalement inaudible (gain = 0.0001) pour garder le contexte vivant
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      o.start(ctx.currentTime); o.stop(ctx.currentTime + 0.05);
+    } catch(e) {}
+  }, 10000);
+}
+function stopAudioKeepalive() {
+  if (keepaliveIv) { clearInterval(keepaliveIv); keepaliveIv = null; }
 }
 
 function pauseTimer() {
@@ -604,6 +727,7 @@ function pauseTimer() {
   document.getElementById('startBtn').textContent='Reprendre';
   document.getElementById('runningDot').classList.remove('active');
   clearInterval(iv);
+  stopAudioKeepalive();
 }
 
 function resetTimer() {
@@ -636,10 +760,19 @@ function completeSession() {
     const w=totalTime-timeLeft; if(w>=60) saveSession(w);
     sessions=Math.min(sessions+1,MAX_S); updateDots();
     const next=sessions>=MAX_S?'long':'short';
-    showToast(sessions>=MAX_S?'🎯 4 sessions ! Longue pause méritée':'✓ Session terminée — pause !');
+    const msg = sessions>=MAX_S ? '🎯 4 sessions ! Longue pause méritée' : '✓ Session terminée — pause !';
+    const notifBody = sessions>=MAX_S
+      ? `${getActivity()} — 4 sessions complètes ! Prends une longue pause.`
+      : `${getActivity()} — Session terminée. Pause de ${dur.short} min.`;
+    showToast(msg);
+    sendNotification('⏱ Deepwork Timer', notifBody);
     setTimeout(()=>switchMode(next),800);
     if(sessions>=MAX_S) sessions=0;
-  } else { showToast('⚡ Pause terminée — retour au focus'); setTimeout(()=>switchMode('focus'),800); }
+  } else {
+    showToast('⚡ Pause terminée — retour au focus');
+    sendNotification('⏱ Deepwork Timer', 'Pause terminée — retour au focus !');
+    setTimeout(()=>switchMode('focus'),800);
+  }
   playSound();
   if(document.getElementById('statsSection').classList.contains('open')){ setTimeout(()=>{renderStats();updateBarChart();updatePieChart();},900); }
 }
@@ -759,7 +892,17 @@ function updateBarChart() {
   const accent=getCSSVar('--accent'), muted=getCSSVar('--muted'), surface=getCSSVar('--surface'), text=getCSSVar('--text');
   let labels=[],data=[];
   if(barTab==='week'){
-    for(let i=6;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); d.setHours(0,0,0,0); labels.push(d.toLocaleDateString('fr-FR',{weekday:'short'})); data.push(Math.round(all.filter(s=>s.date.slice(0,10)===d.toISOString().slice(0,10)).reduce((a,s)=>a+s.duration,0)/60)); }
+    // Semaine lun→dim : trouver le lundi de la semaine en cours
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - ((now.getDay()+6)%7));
+    monday.setHours(0,0,0,0);
+    for(let i=0;i<7;i++){
+      const d=new Date(monday); d.setDate(monday.getDate()+i);
+      const isToday = d.toISOString().slice(0,10) === now.toISOString().slice(0,10);
+      const isFuture = d > now;
+      labels.push(d.toLocaleDateString('fr-FR',{weekday:'short'}));
+      data.push(isFuture ? null : Math.round(all.filter(s=>s.date.slice(0,10)===d.toISOString().slice(0,10)).reduce((a,s)=>a+s.duration,0)/60));
+    }
   } else if(barTab==='month'){
     for(let i=3;i>=0;i--){ const we=new Date(now); we.setDate(now.getDate()-i*7); const ws=new Date(we); ws.setDate(we.getDate()-6); ws.setHours(0,0,0,0); we.setHours(23,59,59,999); labels.push(ws.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})); data.push(Math.round(all.filter(s=>{const d=new Date(s.date);return d>=ws&&d<=we;}).reduce((a,s)=>a+s.duration,0)/60)); }
   } else {
