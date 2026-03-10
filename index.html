@@ -635,7 +635,7 @@ function switchMode(m){
 
 function toggleTimer(){
   if(otMode){
-    // User clicked Démarrer while overtime is showing — dismiss overtime and go to next mode
+    // Overtime actif : cliquer Démarrer = ignorer le temps sup et passer à la pause
     otSkip();
     return;
   }
@@ -722,7 +722,6 @@ function startOvertimeMode(){
   document.getElementById('ttime').classList.add('overtime');
   document.getElementById('pfill').className='pfill ot';
   document.getElementById('modeLbl').textContent='Temps supplémentaire';
-  document.getElementById('btnStart').textContent='Passer →';
   document.getElementById('otBanner').classList.add('show');
   document.getElementById('otTime').textContent='+00:00';
   startKeepalive();
